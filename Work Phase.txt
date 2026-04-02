@@ -1,0 +1,15 @@
+Phase 1: server
+
+    create server, test in browser with my game.py file
+    using flask or any tech u want
+
+Phase 2: frontend
+
+    setup frontend with backend server.
+    setup chessboard.js, conect API, smooth play moves
+
+Phase 3: Integration
+
+    connect everything, fix bug if any, smooth animation in frontend
+
+phase 4: last event setup, tournaments!!
