@@ -1,4 +1,55 @@
-venv/
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+env/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Frontend builds
+dist/
+build/
+.next/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Runtime
+tmp/
+temp/
+
+# Databases/local state
+*.db
+*.sqlite
+*.sqlite3
+
+# Generated game/runtime data
+generated/
+runtime/
+cache/
+
+# Uploaded/private bot artifacts
+uploaded_bots/
+bot_uploads/
