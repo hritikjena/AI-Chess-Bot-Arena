@@ -1,1 +1,7 @@
 chess==1.11.2
+fastapi==0.111.0
+uvicorn==0.30.1
+sqlalchemy==2.0.30
+pydantic==2.7.4
+google-genai
+python-dotenv
