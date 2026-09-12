@@ -1,0 +1,25 @@
+FROM python:3.10-slim
+
+# Install system dependencies (stockfish)
+RUN apt-get update && apt-get install -y \
+    stockfish \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Install Python requirements
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the rest of the application
+COPY . .
+
+# Set environment variable so the backend knows where stockfish is
+ENV STOCKFISH_PATH=/usr/games/stockfish
+ENV PYTHONUNBUFFERED=1
+
+# Expose FastAPI port
+EXPOSE 8000
+
+# Run the backend
+CMD ["uvicorn", "Server.main:app", "--host", "0.0.0.0", "--port", "8000"]

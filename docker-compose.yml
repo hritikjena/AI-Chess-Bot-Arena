@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: chess_arena_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - arena_data:/app
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+      args:
+        # For a VPS deployment, this should be the public IP or Domain name
+        # e.g., http://your-vps-ip:8000/api
+        - VITE_API_BASE_URL=http://localhost:8000/api
+        - VITE_WS_BASE_URL=ws://localhost:8000/api
+    container_name: chess_arena_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  arena_data:
