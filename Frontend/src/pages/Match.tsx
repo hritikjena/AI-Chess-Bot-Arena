@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Chessboard } from 'react-chessboard';
-import { Play, Square, Trophy, History, ArrowLeft, ArrowRight, SkipForward, SkipBack } from 'lucide-react';
+import { Play, Square, ArrowLeft, ArrowRight, SkipForward, SkipBack, BrainCircuit, Activity } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { Chess } from 'chess.js';
+import { BentoGrid } from '../components/bento/BentoGrid';
+import { BentoCard } from '../components/bento/BentoCard';
+import { Button } from '../components/ui/Button';
+import { Badge } from '../components/ui/Badge';
 
 interface GameState {
   status: string;
@@ -24,7 +28,7 @@ export default function Match() {
   const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
   const [fen, setFen] = useState(START_FEN);
   const [status, setStatus] = useState<string>('idle');
-  const [matchId, setMatchId] = useState<number | null>(replayMatchId ? parseInt(replayMatchId) : null);
+  const [, setMatchId] = useState<number | null>(replayMatchId ? parseInt(replayMatchId) : null);
   const [whitePoints, setWhitePoints] = useState(0);
   const [blackPoints, setBlackPoints] = useState(0);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
@@ -36,7 +40,7 @@ export default function Match() {
   const [currentMoveIndex, setCurrentMoveIndex] = useState(-1);
   const chessRef = useRef(new Chess());
   const [isPlaying, setIsPlaying] = useState(false);
-  const playIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const playIntervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const ws = useRef<WebSocket | null>(null);
 
@@ -182,228 +186,261 @@ export default function Match() {
   };
 
   return (
-    <div className="animate-in fade-in duration-500 max-w-6xl mx-auto space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-8 animate-in fade-in duration-500 max-w-7xl mx-auto">
+      
+      {/* Header and Controls */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-arena">
         <div>
-          <h1 className="text-3xl font-bold text-slate-100">
-            {isReplayMode ? `Match Replay` : `Live Match Arena`}
+          <h1 className="text-4xl font-display font-medium text-arena-primary tracking-wide">
+            {isReplayMode ? 'Match Replay' : 'Live Match Arena'}
           </h1>
-          {isReplayMode && matchInfo && (
-            <p className="text-slate-400 mt-1">{matchInfo.round_name} • {matchInfo.result} • {matchInfo.reason}</p>
-          )}
+          <p className="text-sm text-arena-secondary mt-2 font-light flex items-center gap-2">
+            {isReplayMode && matchInfo ? (
+              <>
+                <span className="font-mono uppercase tracking-widest text-arena-muted">{matchInfo.round_name}</span>
+                <span className="w-1 h-1 rounded-full bg-arena-muted" />
+                <span>{matchInfo.result}</span>
+                <span className="w-1 h-1 rounded-full bg-arena-muted" />
+                <span className="italic">{matchInfo.reason}</span>
+              </>
+            ) : (
+              'Observe autonomous chess engines compete in real-time.'
+            )}
+          </p>
         </div>
         
-        {/* Controls */}
-        <div className="flex items-center gap-4 bg-slate-800 p-2 rounded-xl border border-slate-700">
+        {/* Match Setup Controls */}
+        <div className="flex items-center gap-4 bg-white/[0.02] p-2 rounded-xl border border-arena">
           <select 
             value={bot1 || ''} 
             onChange={(e) => setBot1(Number(e.target.value))}
             disabled={status === 'playing' || isReplayMode}
-            className="bg-slate-900 text-slate-200 border-none rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none max-w-[200px]"
+            className="bg-transparent text-arena-primary border-none rounded-lg px-4 py-2 focus:ring-1 focus:ring-arena-accent outline-none font-medium appearance-none cursor-pointer disabled:opacity-50"
           >
-            {bots.map(b => <option key={`w-${b.id}`} value={b.id}>{b.name} (White)</option>)}
+            {bots.map(b => <option key={`w-${b.id}`} value={b.id} className="bg-arena-bg">{b.name} (White)</option>)}
           </select>
-          <span className="text-slate-500 font-bold px-2">VS</span>
+          
+          <span className="text-arena-muted font-display italic px-2">vs</span>
+          
           <select 
             value={bot2 || ''} 
             onChange={(e) => setBot2(Number(e.target.value))}
             disabled={status === 'playing' || isReplayMode}
-            className="bg-slate-900 text-slate-200 border-none rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none max-w-[200px]"
+            className="bg-transparent text-arena-primary border-none rounded-lg px-4 py-2 focus:ring-1 focus:ring-arena-accent outline-none font-medium appearance-none cursor-pointer disabled:opacity-50"
           >
-            {bots.map(b => <option key={`b-${b.id}`} value={b.id}>{b.name} (Black)</option>)}
+            {bots.map(b => <option key={`b-${b.id}`} value={b.id} className="bg-arena-bg">{b.name} (Black)</option>)}
           </select>
           
           {!isReplayMode && (
             status !== 'playing' ? (
-              <button 
-                onClick={startMatch}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold transition-colors ml-2"
-              >
-                <Play size={18} /> Start
-              </button>
+              <Button onClick={startMatch} className="flex items-center gap-2 ml-2">
+                <Play size={16} /> Deploy
+              </Button>
             ) : (
-              <button 
-                onClick={stopMatch}
-                className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg font-semibold transition-colors ml-2"
-              >
-                <Square size={18} /> Stop
-              </button>
+              <Button onClick={stopMatch} variant="danger" className="flex items-center gap-2 ml-2">
+                <Square size={16} /> Halt
+              </Button>
             )
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-4">
+      <BentoGrid columns={3}>
         
         {/* Main Chessboard Area */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="bg-slate-800/80 p-6 rounded-2xl border border-slate-700 shadow-2xl shadow-black/50">
-            
-            {/* Opponent (Black) Info */}
-            <div className="flex justify-between items-center mb-4 px-2">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center border border-slate-700">
-                  <span className="text-xl">♟️</span>
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-200">{bots.find(b => b.id === bot2)?.name || 'Loading...'}</h3>
-                  <p className="text-sm text-slate-400">Playing Black {matchInfo?.winner_id === bot2 && <span className="text-green-500 font-bold ml-2">(Winner)</span>}</p>
+        <BentoCard colSpan={2} noPadding className="flex flex-col h-full min-h-[600px]">
+          
+          {/* Opponent (Black) Info */}
+          <div className="p-6 border-b border-arena/50 flex justify-between items-center bg-white/[0.01]">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 neu-inset rounded-xl flex items-center justify-center text-2xl">
+                ♟️
+              </div>
+              <div>
+                <h3 className="font-display font-medium text-xl text-arena-primary">
+                  {bots.find(b => b.id === bot2)?.name || 'Loading...'}
+                </h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs font-mono uppercase tracking-widest text-arena-muted">Black</span>
+                  {matchInfo?.winner_id === bot2 && (
+                    <Badge variant="success">Winner</Badge>
+                  )}
                 </div>
               </div>
-              {!isReplayMode && (
-                <div className="text-right">
-                  <span className="text-2xl font-bold text-slate-100">{blackPoints}</span>
-                  <span className="text-slate-500 text-sm ml-1">pts</span>
-                </div>
-              )}
             </div>
+            {!isReplayMode && (
+              <div className="text-right">
+                <span className="text-3xl font-display font-semibold text-arena-primary">{blackPoints}</span>
+                <span className="text-arena-muted text-xs font-mono uppercase tracking-widest ml-2">pts</span>
+              </div>
+            )}
+          </div>
 
-            {/* Board */}
-            <div className="rounded-xl overflow-hidden shadow-inner max-w-[600px] mx-auto">
+          {/* Board Container */}
+          <div className="flex-1 flex flex-col items-center justify-center p-8 relative">
+            
+            {/* Status Indicator overlay if not idle */}
+            {status !== 'idle' && (
+              <div className="absolute top-4 right-4 flex items-center gap-2">
+                <span className="relative flex h-3 w-3">
+                  {status === 'playing' && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>}
+                  <span className={`relative inline-flex rounded-full h-3 w-3 ${
+                    status === 'playing' ? 'bg-success' : 
+                    status === 'completed' ? 'bg-warning' : 
+                    status === 'error' ? 'bg-danger' : 'bg-arena-muted'
+                  }`}></span>
+                </span>
+                <span className="text-xs font-mono uppercase tracking-widest text-arena-muted">
+                  {status}
+                </span>
+              </div>
+            )}
+
+            <div className="w-full max-w-[500px] aspect-square rounded-sm overflow-hidden neu-raised">
               <Chessboard 
                 options={{
                   position: fen,
-                  darkSquareStyle: { backgroundColor: '#475569' },
-                  lightSquareStyle: { backgroundColor: '#94a3b8' },
-                  animationDurationInMs: 200
+                  darkSquareStyle: { backgroundColor: '#2d333b' },
+                  lightSquareStyle: { backgroundColor: '#e2e8f0' },
+                  animationDurationInMs: 200,
+                  boardStyle: {
+                    borderRadius: '2px',
+                    boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5)'
+                  }
                 }}
               />
             </div>
             
             {/* Playback Controls (Replay Only) */}
             {isReplayMode && (
-              <div className="mt-6 flex justify-center items-center gap-4 bg-slate-900/50 p-4 rounded-xl border border-slate-700">
+              <div className="mt-8 flex items-center justify-center gap-4 neu-inset p-3 rounded-full">
                 <button 
                   onClick={() => { setIsPlaying(false); setCurrentMoveIndex(-1); }}
-                  className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+                  className="p-2 text-arena-muted hover:text-arena-primary transition-colors"
                 >
-                  <SkipBack size={24} />
+                  <SkipBack size={20} />
                 </button>
                 <button 
                   onClick={() => { setIsPlaying(false); setCurrentMoveIndex(p => Math.max(-1, p - 1)); }}
-                  className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+                  className="p-2 text-arena-muted hover:text-arena-primary transition-colors"
                 >
-                  <ArrowLeft size={24} />
+                  <ArrowLeft size={20} />
                 </button>
                 
                 <button 
                   onClick={() => setIsPlaying(!isPlaying)}
-                  className="p-3 bg-blue-600 hover:bg-blue-500 text-white rounded-full transition-all shadow-lg"
+                  className="w-12 h-12 flex items-center justify-center bg-arena-accent text-white rounded-full transition-transform hover:scale-105 shadow-[0_4px_20px_rgba(201,162,109,0.3)]"
                 >
-                  {isPlaying ? <Square size={24} /> : <Play size={24} className="ml-1" />}
+                  {isPlaying ? <Square size={20} /> : <Play size={20} className="ml-1" />}
                 </button>
                 
                 <button 
                   onClick={() => { setIsPlaying(false); setCurrentMoveIndex(p => Math.min(replayMoves.length - 1, p + 1)); }}
-                  className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+                  className="p-2 text-arena-muted hover:text-arena-primary transition-colors"
                 >
-                  <ArrowRight size={24} />
+                  <ArrowRight size={20} />
                 </button>
                 <button 
                   onClick={() => { setIsPlaying(false); setCurrentMoveIndex(replayMoves.length - 1); }}
-                  className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+                  className="p-2 text-arena-muted hover:text-arena-primary transition-colors"
                 >
-                  <SkipForward size={24} />
+                  <SkipForward size={20} />
                 </button>
-                <div className="ml-4 font-mono text-sm text-slate-400">
-                  {currentMoveIndex + 1} / {replayMoves.length}
+                <div className="ml-4 font-mono text-sm text-arena-muted w-16 text-center border-l border-arena pl-4">
+                  {currentMoveIndex + 1}/{replayMoves.length}
                 </div>
               </div>
             )}
             
             {/* Debug FEN */}
-            <div className="mt-2 text-center text-xs text-slate-500 font-mono break-all px-4">
-              FEN: {fen}
+            <div className="mt-4 text-center text-[10px] text-arena-muted font-mono opacity-50 max-w-md truncate">
+              {fen}
             </div>
+          </div>
 
-            {/* Player (White) Info */}
-            <div className="flex justify-between items-center mt-4 px-2">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center border border-slate-300">
-                  <span className="text-xl">♙</span>
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-200">{bots.find(b => b.id === bot1)?.name || 'Loading...'}</h3>
-                  <p className="text-sm text-slate-400">Playing White {matchInfo?.winner_id === bot1 && <span className="text-green-500 font-bold ml-2">(Winner)</span>}</p>
+          {/* Player (White) Info */}
+          <div className="p-6 border-t border-arena/50 flex justify-between items-center bg-white/[0.01]">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-[#e2e8f0] text-[#2d333b] rounded-xl flex items-center justify-center text-2xl shadow-inner">
+                ♙
+              </div>
+              <div>
+                <h3 className="font-display font-medium text-xl text-arena-primary">
+                  {bots.find(b => b.id === bot1)?.name || 'Loading...'}
+                </h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs font-mono uppercase tracking-widest text-arena-muted">White</span>
+                  {matchInfo?.winner_id === bot1 && (
+                    <Badge variant="success">Winner</Badge>
+                  )}
                 </div>
               </div>
-              {!isReplayMode && (
-                <div className="text-right">
-                  <span className="text-2xl font-bold text-slate-100">{whitePoints}</span>
-                  <span className="text-slate-500 text-sm ml-1">pts</span>
-                </div>
-              )}
             </div>
-            
+            {!isReplayMode && (
+              <div className="text-right">
+                <span className="text-3xl font-display font-semibold text-arena-primary">{whitePoints}</span>
+                <span className="text-arena-muted text-xs font-mono uppercase tracking-widest ml-2">pts</span>
+              </div>
+            )}
           </div>
-        </div>
+        </BentoCard>
 
         {/* Sidebar panels */}
-        <div className="space-y-6">
+        <div className="col-span-1 space-y-6 flex flex-col">
           
-          {/* Match Status */}
-          <div className="bg-slate-800 p-5 rounded-2xl border border-slate-700">
-            <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2 mb-4">
-              <Trophy size={18} className="text-amber-500" />
-              Status
-            </h3>
-            <div className="p-4 bg-slate-900 rounded-xl border border-slate-700/50">
-              <div className="flex items-center gap-3">
-                <div className={`w-3 h-3 rounded-full ${
-                  status === 'playing' ? 'bg-green-500 animate-pulse' : 
-                  status === 'completed' ? 'bg-amber-500' : 
-                  status === 'error' ? 'bg-red-500' : 'bg-slate-600'
-                }`}></div>
-                <span className="font-medium text-slate-300 capitalize">{status}</span>
+          {/* AI Commentary Panel */}
+          {commentary && (
+            <BentoCard className="border-arena-accent/30 shadow-[0_0_30px_rgba(201,162,109,0.1)] relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                <BrainCircuit size={100} />
               </div>
-            </div>
-          </div>
-
+              <h3 className="text-sm font-mono uppercase tracking-widest text-arena-accent flex items-center gap-2 mb-4 relative z-10">
+                <BrainCircuit size={16} />
+                Grandmaster Analysis
+              </h3>
+              <p className="text-arena-primary italic font-light leading-relaxed relative z-10">
+                "{commentary}"
+              </p>
+            </BentoCard>
+          )}
+          
           {/* Move History */}
-          <div className="bg-slate-800 p-5 rounded-2xl border border-slate-700 flex flex-col h-[400px]">
-            <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2 mb-4">
-              <History size={18} className="text-blue-400" />
-              Move History
-            </h3>
-            <div className="flex-1 overflow-y-auto bg-slate-900 rounded-xl p-4 border border-slate-700/50 space-y-2">
+          <BentoCard title="Move Log" className="flex-1 flex flex-col min-h-[400px]">
+            <div className="flex-1 overflow-y-auto pr-2 -mr-2 space-y-1">
               {moveHistory.length === 0 ? (
-                <div className="text-center text-slate-500 mt-10">No moves yet</div>
+                <div className="h-full flex flex-col items-center justify-center text-arena-muted gap-4 opacity-50">
+                  <Activity size={32} strokeWidth={1} />
+                  <span className="font-mono text-xs uppercase tracking-widest">Awaiting Initial Move</span>
+                </div>
               ) : (
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
                   {moveHistory.reduce((result: string[][], _, index, array) => {
                     if (index % 2 === 0) result.push(array.slice(index, index + 2));
                     return result;
                   }, []).map((pair, idx) => (
                     <React.Fragment key={idx}>
-                      <div className="text-slate-400 font-mono flex items-center gap-2">
-                        <span className="text-slate-600 w-6">{idx + 1}.</span> 
-                        <span className={isReplayMode && currentMoveIndex === idx * 2 ? 'text-blue-400 font-bold bg-blue-900/30 px-1 rounded' : ''}>{pair[0]}</span>
+                      <div className="text-arena-primary font-mono flex items-center gap-3">
+                        <span className="text-arena-muted text-xs w-6">{idx + 1}.</span> 
+                        <span className={`px-2 py-0.5 rounded transition-colors ${isReplayMode && currentMoveIndex === idx * 2 ? 'bg-arena-accent/20 text-arena-accent' : ''}`}>
+                          {pair[0]}
+                        </span>
                       </div>
-                      <div className="text-slate-400 font-mono flex items-center">
-                        {pair[1] && <span className={isReplayMode && currentMoveIndex === idx * 2 + 1 ? 'text-blue-400 font-bold bg-blue-900/30 px-1 rounded' : ''}>{pair[1]}</span>}
+                      <div className="text-arena-primary font-mono flex items-center">
+                        {pair[1] && (
+                          <span className={`px-2 py-0.5 rounded transition-colors ${isReplayMode && currentMoveIndex === idx * 2 + 1 ? 'bg-arena-accent/20 text-arena-accent' : ''}`}>
+                            {pair[1]}
+                          </span>
+                        )}
                       </div>
                     </React.Fragment>
                   ))}
                 </div>
               )}
             </div>
-          </div>
-          
-          {/* AI Commentary Panel */}
-          {commentary && (
-            <div className="bg-slate-800 p-5 rounded-2xl border border-blue-500/50 shadow-[0_0_20px_rgba(59,130,246,0.15)] animate-in slide-in-from-right-4 duration-500 fade-in">
-              <h3 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 flex items-center gap-2 mb-3">
-                <span className="text-xl">🤖</span>
-                Grandmaster AI
-              </h3>
-              <div className="p-4 bg-slate-900 rounded-xl border border-slate-700/50">
-                <p className="text-slate-300 italic font-medium">"{commentary}"</p>
-              </div>
-            </div>
-          )}
+          </BentoCard>
           
         </div>
-      </div>
+      </BentoGrid>
     </div>
   );
 }

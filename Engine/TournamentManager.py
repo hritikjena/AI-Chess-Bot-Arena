@@ -60,14 +60,36 @@ def generate_knockout_bracket(tournament_id: int, db: Session):
     # Fill the first round (largest round_idx - 1)
     first_round_matches = matches_by_round[round_idx - 1]
     
+    def generate_seed_order(n):
+        if n == 1:
+            return [1]
+        prev = generate_seed_order(n // 2)
+        res = []
+        for p in prev:
+            res.append(p)
+            res.append(n + 1 - p)
+        return res
+
+    seed_order = generate_seed_order(bracket_size)
+    
+    participants.sort(key=lambda x: x.seed)
+    seed_to_participant = {p.seed: p for p in participants}
+
     # Assign bots to first round slots
     slots = []
     for m in first_round_matches:
         slots.append({"match": m, "bots": []})
         
-    # Simple distribution (this can be improved for strict seeded brackets)
-    for i, p in enumerate(participants):
-        slots[i % len(slots)]["bots"].append(p)
+    # Distribute based on standard seeding
+    for i in range(0, bracket_size, 2):
+        s1 = seed_order[i]
+        s2 = seed_order[i+1]
+        slot_idx = i // 2
+        
+        if s1 in seed_to_participant:
+            slots[slot_idx]["bots"].append(seed_to_participant[s1])
+        if s2 in seed_to_participant:
+            slots[slot_idx]["bots"].append(seed_to_participant[s2])
         
     # Apply byes and set PENDING matches
     for slot in slots:

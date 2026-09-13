@@ -1,13 +1,106 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #3b82f6;
-  --color-secondary: #1e293b;
-  --color-accent: #f59e0b;
+  --font-display: "Cormorant Garamond", serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --color-surface-bg: #111316;
+  --color-surface: #181a1f;
+  --color-surface-raised: #1f2229;
+  --color-surface-inset: #0c0e11;
+
+  --color-text-primary: #f2efe9;
+  --color-text-secondary: #a39f96;
+  --color-text-muted: #6b6861;
+
+  --color-accent: #c4a777;
+  --color-accent-hover: #d1b88a;
+
+  --color-success: #4a7c59;
+  --color-danger: #8c3b3b;
+  --color-warning: #9e7b3c;
+
+  /* Custom Box Shadows for Neumorphism */
+  --shadow-raised: 6px 6px 12px #0a0b0d, -6px -6px 12px #262931;
+  --shadow-raised-sm: 4px 4px 8px #0a0b0d, -4px -4px 8px #262931;
+  --shadow-raised-hover: 8px 8px 16px #08090b, -8px -8px 16px #2a2e37;
+  
+  --shadow-inset: inset 4px 4px 8px #08090b, inset -4px -4px 8px #22252c;
+  --shadow-inset-sm: inset 2px 2px 4px #08090b, inset -2px -2px 4px #22252c;
 }
 
 body {
-  background-color: #0f172a;
-  color: #f8fafc;
-  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--color-surface-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom utility classes */
+@layer utilities {
+  .bg-arena-bg { background-color: var(--color-surface-bg); }
+  .bg-arena-surface { background-color: var(--color-surface); }
+  .bg-arena-raised { background-color: var(--color-surface-raised); }
+  .bg-arena-inset { background-color: var(--color-surface-inset); }
+
+  .text-arena-primary { color: var(--color-text-primary); }
+  .text-arena-secondary { color: var(--color-text-secondary); }
+  .text-arena-muted { color: var(--color-text-muted); }
+  .text-arena-accent { color: var(--color-accent); }
+
+  .border-arena { border-color: rgba(255,255,255,0.05); border-width: 1px; }
+
+  /* Neumorphic specific styles */
+  .neu-raised {
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-raised);
+    border: 1px solid rgba(255, 255, 255, 0.02);
+  }
+  
+  .neu-raised-sm {
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-raised-sm);
+    border: 1px solid rgba(255, 255, 255, 0.02);
+  }
+
+  .neu-raised-interactive {
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-raised);
+    border: 1px solid rgba(255, 255, 255, 0.02);
+    transition: all 0.2s ease;
+  }
+  
+  .neu-raised-interactive:hover {
+    box-shadow: var(--shadow-raised-hover);
+    transform: translateY(-2px);
+  }
+  
+  .neu-raised-interactive:active {
+    box-shadow: var(--shadow-inset-sm);
+    transform: translateY(0);
+  }
+
+  .neu-inset {
+    background-color: var(--color-surface-inset);
+    box-shadow: var(--shadow-inset);
+    border: 1px solid rgba(255, 255, 255, 0.01);
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-surface-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-raised);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
 }

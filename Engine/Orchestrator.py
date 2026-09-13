@@ -79,13 +79,43 @@ async def process_match(match_id: int):
         db.commit()
         
         # Advance winner
-        if winner_id and match.next_match_id:
-            next_m = db.query(models.Match).filter(models.Match.id == match.next_match_id).first()
-            if not next_m.bot1_id:
-                next_m.bot1_id = winner_id
-            else:
-                next_m.bot2_id = winner_id
+        if match.tournament_id:
+            loser_id = bot1.id if winner_id == bot2.id else bot2.id
+            if loser_id:
+                loser_participant = db.query(models.TournamentParticipant).filter(
+                    models.TournamentParticipant.tournament_id == match.tournament_id,
+                    models.TournamentParticipant.bot_id == loser_id
+                ).first()
+                if loser_participant:
+                    loser_participant.status = "ELIMINATED"
+            
+            if winner_id and match.next_match_id:
+                next_m = db.query(models.Match).filter(models.Match.id == match.next_match_id).first()
+                if not next_m.bot1_id:
+                    next_m.bot1_id = winner_id
+                else:
+                    next_m.bot2_id = winner_id
+            elif winner_id and not match.next_match_id:
+                # Tournament finished!
+                tournament = db.query(models.Tournament).filter(models.Tournament.id == match.tournament_id).first()
+                if tournament:
+                    tournament.status = "COMPLETED"
+                
+                winner_participant = db.query(models.TournamentParticipant).filter(
+                    models.TournamentParticipant.tournament_id == match.tournament_id,
+                    models.TournamentParticipant.bot_id == winner_id
+                ).first()
+                if winner_participant:
+                    winner_participant.status = "CHAMPION"
             db.commit()
+        else:
+            if winner_id and match.next_match_id:
+                next_m = db.query(models.Match).filter(models.Match.id == match.next_match_id).first()
+                if not next_m.bot1_id:
+                    next_m.bot1_id = winner_id
+                else:
+                    next_m.bot2_id = winner_id
+                db.commit()
             
     except Exception as e:
         print(f"Error processing match {match_id}: {e}")

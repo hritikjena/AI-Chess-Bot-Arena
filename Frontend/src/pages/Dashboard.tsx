@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Activity, Users, Swords, Trophy, TrendingUp, AlertTriangle, BrainCircuit, XCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Activity, Swords, Trophy, BrainCircuit, ShieldAlert, Cpu } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { BentoGrid } from '../components/bento/BentoGrid';
+import { BentoCard } from '../components/bento/BentoCard';
+import { Badge } from '../components/ui/Badge';
 
 interface BotPerformance {
   bot_id: number;
@@ -70,182 +73,201 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <div className="flex h-[80vh] items-center justify-center">
+        <div className="text-arena-muted flex flex-col items-center gap-4">
+          <BrainCircuit className="animate-pulse" size={48} />
+          <p className="font-mono text-sm tracking-widest uppercase">Initializing Intelligence...</p>
+        </div>
       </div>
     );
   }
 
-  if (!data) return <div className="text-white">Failed to load dashboard</div>;
+  if (!data) return <div className="text-danger">Failed to load dashboard data.</div>;
 
   return (
-    <div className="space-y-6 text-slate-100">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-amber-500 flex items-center gap-3">
-          <Activity size={32} className="text-blue-500" />
-          Intelligence Center
+    <div className="space-y-12 animate-in fade-in duration-500">
+      
+      {/* Header */}
+      <div>
+        <h1 className="text-4xl font-display font-medium text-arena-primary tracking-wide">
+          Arena Intelligence
         </h1>
+        <p className="text-sm text-arena-secondary mt-2 font-light">
+          Live overview of autonomous performance, tournament results, and AI analysis.
+        </p>
       </div>
 
-      {/* AI Summary Banner */}
-      <div className="bg-gradient-to-r from-slate-800 to-indigo-900 border border-indigo-500/30 rounded-xl p-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-4 opacity-10">
-          <BrainCircuit size={120} />
-        </div>
-        <div className="relative z-10">
-          <h2 className="text-lg font-semibold text-indigo-300 flex items-center gap-2 mb-2">
-            <BrainCircuit size={20} />
-            Grandmaster AI Analysis
-          </h2>
-          <p className="text-xl font-medium leading-relaxed">
-            {data.grandmaster_summary}
-          </p>
-        </div>
-      </div>
+      <BentoGrid columns={4}>
+        
+        {/* Top Metrics Row */}
+        <BentoCard colSpan={1} className="justify-center">
+          <div className="flex items-center gap-4">
+            <div className="p-3 neu-inset rounded-lg text-arena-accent">
+              <Cpu size={24} strokeWidth={1.5} />
+            </div>
+            <div>
+              <div className="text-xs font-mono text-arena-muted uppercase tracking-widest">Total Engines</div>
+              <div className="text-3xl font-display font-semibold text-arena-primary">{data.summary.total_bots}</div>
+            </div>
+          </div>
+        </BentoCard>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 flex items-center gap-4">
-          <div className="p-3 bg-blue-500/10 text-blue-400 rounded-lg">
-            <Users size={24} />
+        <BentoCard colSpan={1} className="justify-center">
+          <div className="flex items-center gap-4">
+            <div className="p-3 neu-inset rounded-lg text-arena-primary">
+              <Swords size={24} strokeWidth={1.5} />
+            </div>
+            <div>
+              <div className="text-xs font-mono text-arena-muted uppercase tracking-widest">Matches</div>
+              <div className="text-3xl font-display font-semibold text-arena-primary">{data.summary.total_games}</div>
+            </div>
           </div>
-          <div>
-            <div className="text-slate-400 text-sm font-medium">Total Bots</div>
-            <div className="text-2xl font-bold">{data.summary.total_bots}</div>
-          </div>
-        </div>
-        <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 flex items-center gap-4">
-          <div className="p-3 bg-amber-500/10 text-amber-400 rounded-lg">
-            <Swords size={24} />
-          </div>
-          <div>
-            <div className="text-slate-400 text-sm font-medium">Games Played</div>
-            <div className="text-2xl font-bold">{data.summary.total_games}</div>
-          </div>
-        </div>
-        <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 flex items-center gap-4">
-          <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-lg">
-            <Trophy size={24} />
-          </div>
-          <div>
-            <div className="text-slate-400 text-sm font-medium">Tournaments</div>
-            <div className="text-2xl font-bold">{data.summary.total_tournaments}</div>
-          </div>
-        </div>
-        <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 flex items-center gap-4">
-          <div className="p-3 bg-purple-500/10 text-purple-400 rounded-lg">
-            <Activity size={24} />
-          </div>
-          <div>
-            <div className="text-slate-400 text-sm font-medium">Active Events</div>
-            <div className="text-2xl font-bold">{data.summary.active_tournaments}</div>
-          </div>
-        </div>
-      </div>
+        </BentoCard>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Leaderboard */}
-        <div className="lg:col-span-2 bg-slate-800 border border-slate-700 rounded-xl overflow-hidden flex flex-col h-[500px]">
-          <div className="p-4 border-b border-slate-700 flex items-center justify-between">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              <TrendingUp size={20} className="text-blue-400" />
-              Bot Performance Leaderboard
+        <BentoCard colSpan={1} className="justify-center">
+          <div className="flex items-center gap-4">
+            <div className="p-3 neu-inset rounded-lg text-arena-secondary">
+              <Trophy size={24} strokeWidth={1.5} />
+            </div>
+            <div>
+              <div className="text-xs font-mono text-arena-muted uppercase tracking-widest">Tournaments</div>
+              <div className="text-3xl font-display font-semibold text-arena-primary">{data.summary.total_tournaments}</div>
+            </div>
+          </div>
+        </BentoCard>
+
+        <BentoCard colSpan={1} className="justify-center">
+          <div className="flex items-center gap-4">
+            <div className="p-3 neu-inset rounded-lg text-success">
+              <Activity size={24} strokeWidth={1.5} />
+            </div>
+            <div>
+              <div className="text-xs font-mono text-arena-muted uppercase tracking-widest">Active Events</div>
+              <div className="text-3xl font-display font-semibold text-arena-primary">{data.summary.active_tournaments}</div>
+            </div>
+          </div>
+        </BentoCard>
+
+        {/* AI Grandmaster Summary - Full Width */}
+        <BentoCard colSpan="full" className="relative overflow-hidden group">
+          <div className="absolute right-0 top-0 bottom-0 opacity-5 pointer-events-none transition-transform duration-1000 group-hover:scale-110">
+            <BrainCircuit size={300} strokeWidth={0.5} className="text-arena-accent" />
+          </div>
+          <div className="relative z-10 max-w-4xl">
+            <h2 className="text-sm font-mono text-arena-accent uppercase tracking-widest mb-4 flex items-center gap-3">
+              <BrainCircuit size={16} />
+              AI Intelligence Report
             </h2>
+            <p className="text-2xl font-display font-medium leading-relaxed text-arena-primary/90">
+              "{data.grandmaster_summary}"
+            </p>
           </div>
-          <div className="overflow-auto flex-1 p-0 m-0">
-            <table className="w-full text-left text-sm text-slate-300">
-              <thead className="bg-slate-700/50 text-slate-400 sticky top-0">
+        </BentoCard>
+
+        {/* Engine Performance Leaderboard */}
+        <BentoCard 
+          colSpan={3} 
+          title="Engine Performance Rankings"
+          noPadding
+        >
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm whitespace-nowrap">
+              <thead className="text-arena-muted text-xs font-mono uppercase tracking-widest border-b border-arena">
                 <tr>
-                  <th className="px-4 py-3 font-medium">Bot</th>
-                  <th className="px-4 py-3 font-medium">Win Rate</th>
-                  <th className="px-4 py-3 font-medium">W-L-D</th>
-                  <th className="px-4 py-3 font-medium text-red-400" title="Blunders / Mistakes">Bl/Ms</th>
-                  <th className="px-4 py-3 font-medium text-amber-400" title="Avg Centipawn Loss">Avg CP Loss</th>
+                  <th className="px-8 py-4 font-normal">Engine</th>
+                  <th className="px-8 py-4 font-normal">Win Rate</th>
+                  <th className="px-8 py-4 font-normal">W-L-D</th>
+                  <th className="px-8 py-4 font-normal">Errors (Bl/Ms)</th>
+                  <th className="px-8 py-4 font-normal">Avg CP Loss</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-700/50">
+              <tbody className="divide-y divide-arena/50">
                 {data.bot_performance.sort((a,b) => b.win_rate - a.win_rate).map((bot, i) => (
-                  <tr key={bot.bot_id} className="hover:bg-slate-700/30 transition-colors">
-                    <td className="px-4 py-3 font-medium flex items-center gap-2">
-                      <span className="text-slate-500 w-4">{i + 1}.</span>
-                      {bot.bot_name}
+                  <tr key={bot.bot_id} className="hover:bg-white/[0.02] transition-colors group">
+                    <td className="px-8 py-4 font-medium flex items-center gap-4">
+                      <span className="text-arena-muted font-mono text-xs w-4">{i + 1}.</span>
+                      <span className="text-arena-primary group-hover:text-arena-accent transition-colors">{bot.bot_name}</span>
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-white">{bot.win_rate.toFixed(1)}%</span>
-                        <div className="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                    <td className="px-8 py-4">
+                      <div className="flex items-center gap-3">
+                        <span className="font-semibold text-arena-primary min-w-[3rem]">{bot.win_rate.toFixed(1)}%</span>
+                        <div className="w-24 h-1 neu-inset rounded-full overflow-hidden">
                           <div 
-                            className="h-full bg-blue-500"
+                            className="h-full bg-arena-accent transition-all duration-1000"
                             style={{ width: `${bot.win_rate}%` }}
                           />
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3">
-                      <span className="text-emerald-400">{bot.wins}</span>-
-                      <span className="text-red-400">{bot.losses}</span>-
-                      <span className="text-slate-400">{bot.draws}</span>
+                    <td className="px-8 py-4 font-mono text-arena-secondary">
+                      <span className="text-success">{bot.wins}</span> -{' '}
+                      <span className="text-danger">{bot.losses}</span> -{' '}
+                      <span className="text-arena-muted">{bot.draws}</span>
                     </td>
-                    <td className="px-4 py-3">
-                      <span className="text-red-400 font-medium">{bot.total_blunders}</span> / <span className="text-amber-500">{bot.total_mistakes}</span>
+                    <td className="px-8 py-4 font-mono">
+                      <span className="text-danger">{bot.total_blunders}</span> / <span className="text-warning">{bot.total_mistakes}</span>
                     </td>
-                    <td className="px-4 py-3 font-mono">
+                    <td className="px-8 py-4 font-mono text-arena-secondary">
                       {(bot.avg_eval_loss * 100).toFixed(0)}
                     </td>
                   </tr>
                 ))}
                 {data.bot_performance.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
-                      No matches played yet.
+                    <td colSpan={5} className="px-8 py-12 text-center text-arena-muted font-light">
+                      No matches have been played yet.
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
-        </div>
+        </BentoCard>
 
-        {/* AI Critical Moments */}
-        <div className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden flex flex-col h-[500px]">
-          <div className="p-4 border-b border-slate-700 flex items-center justify-between">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              <AlertTriangle size={20} className="text-amber-400" />
-              Critical AI Insights
-            </h2>
-          </div>
-          <div className="p-4 overflow-y-auto flex-1 space-y-4">
+        {/* Critical Moments */}
+        <BentoCard 
+          colSpan={1} 
+          title="Critical Moments"
+          noPadding
+        >
+          <div className="divide-y divide-arena/50 overflow-y-auto max-h-[400px]">
             {data.ai_insights.map((insight, i) => (
-              <div key={i} className="bg-slate-700/30 p-3 rounded-lg border border-slate-700">
-                <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className={`w-2.5 h-2.5 rounded-full ${insight.color === 'white' ? 'bg-white' : 'bg-black border border-slate-600'}`}></span>
-                    <span className="font-semibold text-sm">Move {insight.move_number}: {insight.move}</span>
+              <div key={i} className="p-6 hover:bg-white/[0.02] transition-colors">
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-3 h-3 rounded-sm ${insight.color === 'white' ? 'bg-arena-primary' : 'neu-inset border border-arena'}`} />
+                    <span className="font-mono text-xs uppercase tracking-widest text-arena-secondary">Move {insight.move_number}: {insight.move}</span>
                   </div>
-                  <span className={`text-xs px-2 py-1 rounded font-medium ${insight.loss >= 1.5 ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400'}`}>
-                    {insight.loss >= 1.5 ? 'Blunder' : 'Mistake'}
-                  </span>
+                  <Badge variant={insight.loss >= 1.5 ? 'danger' : 'warning'}>
+                    {insight.loss >= 1.5 ? 'BLUNDER' : 'MISTAKE'}
+                  </Badge>
                 </div>
-                <p className="text-sm text-slate-300 italic mb-2">
-                  {insight.commentary}
+                
+                <p className="text-sm text-arena-primary font-light leading-relaxed mb-4">
+                  "{insight.commentary}"
                 </p>
-                <div className="text-xs text-slate-500 font-mono flex justify-between items-center">
-                  <Link to={`/match?id=${insight.match_id}`} className="text-blue-400 hover:underline">
-                    Match #{insight.match_id}
+                
+                <div className="flex justify-between items-center text-xs font-mono text-arena-muted">
+                  <Link to={`/match?id=${insight.match_id}`} className="hover:text-arena-accent transition-colors">
+                    MATCH #{insight.match_id}
                   </Link>
-                  <span>Eval: {insight.eval_before > 0 ? '+' : ''}{insight.eval_before.toFixed(1)} ➔ {insight.eval_after > 0 ? '+' : ''}{insight.eval_after.toFixed(1)}</span>
+                  <span>
+                    EVAL: {insight.eval_before > 0 ? '+' : ''}{insight.eval_before.toFixed(1)} ➔ {insight.eval_after > 0 ? '+' : ''}{insight.eval_after.toFixed(1)}
+                  </span>
                 </div>
               </div>
             ))}
+            
             {data.ai_insights.length === 0 && (
-              <div className="text-center py-8 text-slate-500 mt-10">
-                <XCircle size={32} className="mx-auto mb-2 opacity-50" />
-                <p>No critical insights yet.</p>
+              <div className="p-12 text-center text-arena-muted flex flex-col items-center gap-4">
+                <ShieldAlert size={32} strokeWidth={1} className="opacity-50" />
+                <p className="font-light text-sm">No critical insights detected yet.</p>
               </div>
             )}
           </div>
-        </div>
-      </div>
+        </BentoCard>
+
+      </BentoGrid>
     </div>
   );
 }

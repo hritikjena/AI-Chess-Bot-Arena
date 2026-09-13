@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { Upload, Play, Shield, Cpu } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Upload, Play, Cpu, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { BentoGrid } from '../components/bento/BentoGrid';
+import { BentoCard } from '../components/bento/BentoCard';
+import { Button } from '../components/ui/Button';
 
 interface BotData {
   id: number;
@@ -20,68 +23,95 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-12 animate-in fade-in duration-500">
       
-      {/* Hero Section */}
-      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-900 to-slate-900 border border-slate-800 p-10">
-        <div className="relative z-10 max-w-2xl space-y-6">
-          <h1 className="text-5xl font-extrabold tracking-tight text-white">
-            Build. Battle. <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">Analyze.</span>
-          </h1>
-          <p className="text-lg text-slate-300">
-            Upload your chess bot and watch it compete against other engines. Discover tactical brilliance and brutal blunders in a fully automated arena.
+      {/* Premium Hero Section */}
+      <section className="neu-inset rounded-2xl p-10 lg:p-14 border border-arena relative overflow-hidden flex flex-col justify-between">
+        <div className="relative z-10 max-w-3xl space-y-6">
+          <p className="text-arena-accent uppercase tracking-widest text-xs font-mono font-semibold">
+            Autonomous Engine Laboratory
           </p>
-          <div className="flex gap-4 pt-4">
-            <button className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold transition-all hover:scale-105 active:scale-95 shadow-lg shadow-blue-900/50">
-              <Upload size={20} />
-              Upload Bot
-            </button>
-            <Link to="/match" className="flex items-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-semibold transition-all border border-slate-700 hover:border-slate-500 hover:scale-105 active:scale-95">
-              <Play size={20} />
-              Watch Match
+          <h1 className="text-5xl lg:text-6xl font-display font-medium text-arena-primary leading-tight">
+            Design. Compete.<br />
+            <span className="text-arena-secondary italic">Analyze Intelligently.</span>
+          </h1>
+          <p className="text-lg text-arena-muted max-w-xl font-light">
+            Upload your autonomous chess engine and pit it against the world. Discover tactical brilliance and brutal blunders in a fully automated, AI-analyzed arena.
+          </p>
+          <div className="flex gap-4 pt-6">
+            <Button size="lg" className="flex items-center gap-2">
+              <Upload size={18} />
+              Deploy Engine
+            </Button>
+            <Link to="/match">
+              <Button variant="secondary" size="lg" className="flex items-center gap-2">
+                <Play size={18} />
+                Observe Matches
+              </Button>
             </Link>
           </div>
         </div>
         
-        {/* Abstract Background Design */}
-        <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-20 pointer-events-none">
-          <div className="w-full h-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-400 via-transparent to-transparent blur-2xl"></div>
+        {/* Subtle decorative elements */}
+        <div className="absolute -right-20 -bottom-20 opacity-5 pointer-events-none text-arena-accent">
+          <Cpu size={400} strokeWidth={0.5} />
         </div>
       </section>
 
-      {/* Bot Arena Grid */}
-      <section className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-slate-100 flex items-center gap-2">
-            <Shield className="text-amber-500" />
-            Arena Competitors
+      {/* Bots Grid */}
+      <section className="space-y-8">
+        <div className="flex items-center justify-between border-b border-arena pb-4">
+          <h2 className="text-3xl font-display font-medium text-arena-primary tracking-wide flex items-center gap-3">
+            <Sparkles className="text-arena-accent" size={24} />
+            Registered Engines
           </h2>
-          <span className="text-slate-400 font-medium bg-slate-800 px-3 py-1 rounded-full text-sm">
-            {bots.length} Bots Registered
+          <span className="text-arena-muted font-mono text-sm tracking-widest uppercase">
+            {bots.length} Active
           </span>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {bots.map((bot) => (
-            <div key={bot.id} className="group bg-slate-800/50 border border-slate-700 hover:border-blue-500/50 rounded-xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-blue-900/20">
-              <div className="flex justify-between items-start mb-4">
-                <div className="p-3 bg-slate-900/80 rounded-lg text-blue-400 group-hover:text-amber-400 group-hover:bg-slate-900 transition-colors">
-                  <Cpu size={24} />
+        <BentoGrid columns={3}>
+          {bots.map((bot, index) => {
+            // Create a pseudo-random stable visual identity based on index
+            const accentColors = ['text-arena-accent', 'text-success', 'text-arena-primary'];
+            const colorClass = accentColors[index % accentColors.length];
+
+            return (
+              <BentoCard key={bot.id} noPadding className="group hover:-translate-y-1 transition-transform duration-300">
+                <div className="p-6 border-b border-arena/50 flex justify-between items-start bg-white/[0.02]">
+                  <div>
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-arena-muted mb-1 block">
+                      Engine 0{bot.id}
+                    </span>
+                    <h3 className={`text-2xl font-display font-semibold ${colorClass} truncate`}>
+                      {bot.name}
+                    </h3>
+                  </div>
+                  <div className="neu-inset p-3 rounded-lg text-arena-muted group-hover:text-arena-primary transition-colors">
+                    <Cpu size={20} strokeWidth={1.5} />
+                  </div>
                 </div>
-                <div className="flex flex-col items-end">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Win Rate</span>
-                  <span className="text-lg font-bold text-slate-200">--%</span>
+                
+                <div className="p-6 flex-1 flex flex-col justify-between">
+                  <p className="text-sm text-arena-secondary font-light line-clamp-3 mb-6">
+                    {bot.description || 'An autonomous chess engine developed for the arena.'}
+                  </p>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="neu-inset p-3 rounded-lg flex flex-col items-center justify-center">
+                      <span className="text-xs font-mono text-arena-muted uppercase tracking-wider mb-1">Win Rate</span>
+                      <span className="text-lg font-semibold text-arena-primary">--%</span>
+                    </div>
+                    <div className="neu-inset p-3 rounded-lg flex flex-col items-center justify-center">
+                      <span className="text-xs font-mono text-arena-muted uppercase tracking-wider mb-1">Matches</span>
+                      <span className="text-lg font-semibold text-arena-primary">0</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <h3 className="text-xl font-bold text-slate-100 mb-2 truncate">{bot.name}</h3>
-              <p className="text-sm text-slate-400 line-clamp-2 min-h-[2.5rem]">{bot.description}</p>
-              
-              <div className="mt-6 pt-4 border-t border-slate-700/50 flex justify-between items-center text-sm text-slate-400">
-                <span>0 matches played</span>
-              </div>
-            </div>
-          ))}
-        </div>
+              </BentoCard>
+            );
+          })}
+        </BentoGrid>
       </section>
       
     </div>
