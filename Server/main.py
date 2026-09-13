@@ -43,6 +43,10 @@ app.add_middleware(
 def read_root():
     return {"message": "Welcome to Chess Bot Arena API"}
 
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
+
 @app.post("/api/bots/", response_model=schemas.BotResponse)
 def create_bot(bot: schemas.BotCreate, db: Session = Depends(get_db)):
     db_bot = models.Bot(name=bot.name, filename=bot.filename, description=bot.description)

@@ -1,76 +1,52 @@
-# VPS Deployment Guide
+# Deployment Guide (Vercel & Render)
 
-This guide explains how to deploy the **AI Chess Bot Arena** to a Virtual Private Server (VPS) such as DigitalOcean, AWS EC2, or Linode using Docker.
+This guide explains how to deploy the **AI Chess Bot Arena** with **$0 upfront cost** using Vercel (Frontend) and Render (Backend).
 
-## Prerequisites
-- A VPS running Ubuntu (or your preferred Linux distribution)
-- Docker and Docker Compose installed on the VPS
-- Your Gemini API Key
+## 1. Backend Deployment (Render)
 
-## 1. Clone the Repository on your VPS
+Render will host the FastAPI backend, WebSocket server, and execute the Python engine logic.
 
-SSH into your VPS and clone the repository:
+1. **Create a Render Account**: Go to [render.com](https://render.com) and sign up.
+2. **Create a Web Service**: Click "New +" -> "Web Service".
+3. **Connect Repository**: Connect your GitHub account and select the `AI-Chess-Bot-Arena` repository.
+4. **Configure the Service**:
+   - **Name**: `chess-bot-arena-api` (or similar)
+   - **Environment**: `Python`
+   - **Build Command**: `./render-build.sh`
+   - **Start Command**: `uvicorn Server.main:app --host 0.0.0.0 --port $PORT`
+   - **Plan**: `Free`
+5. **Environment Variables**:
+   Under "Advanced", add the following environment variables:
+   - `GEMINI_API_KEY`: Your real Google Gemini API Key.
+   - `GEMINI_MODEL`: `gemini-3.6-flash` (or your preferred model).
+   - `STOCKFISH_PATH`: `./stockfish-ubuntu`
+6. **Deploy**: Click "Create Web Service". Render will run `render-build.sh` (which installs Python dependencies and downloads the Stockfish binary) and then start the Uvicorn server.
+7. **Get the URL**: Once deployed, copy your Render URL (e.g., `https://chess-bot-arena-api.onrender.com`). Verify it works by visiting the `/health` endpoint.
 
-```bash
-git clone https://github.com/hritikjena/AI-Chess-Bot-Arena.git
-cd AI-Chess-Bot-Arena
-```
+> **Note on Persistence**: The Render Free Tier spins down after 15 minutes of inactivity. When it spins down, any SQLite database files or custom uploaded bots are lost. For permanent data persistence, you should upgrade to a persistent disk (Render paid feature) or migrate the database URL to an external PostgreSQL provider (like Supabase).
 
-## 2. Configure Environment Variables
+---
 
-The backend needs your Gemini API key, and the frontend needs to know the public IP address (or domain name) of your VPS so it can talk to the backend.
+## 2. Frontend Deployment (Vercel)
 
-### Backend Config
-Copy the example environment file:
-```bash
-cp .env.example .env
-```
-Edit `.env` (using `nano .env`) and add your real key:
-```env
-GEMINI_API_KEY=your_real_gemini_api_key_here
-GEMINI_MODEL=gemini-3.6-flash
-STOCKFISH_PATH=/usr/games/stockfish
-```
+Vercel will host the React + Vite frontend.
 
-### Frontend Config
-By default, the `docker-compose.yml` builds the frontend assuming the backend is at `http://localhost:8000`. **You must change this to your VPS's public IP or Domain name**.
+1. **Create a Vercel Account**: Go to [vercel.com](https://vercel.com) and sign up.
+2. **Create a New Project**: Click "Add New..." -> "Project".
+3. **Import Repository**: Connect your GitHub account and import the `AI-Chess-Bot-Arena` repository.
+4. **Configure Project**:
+   - **Framework Preset**: `Vite`
+   - **Root Directory**: `Frontend` (Click Edit to select the Frontend folder)
+5. **Environment Variables**:
+   Open the "Environment Variables" section and add the endpoints for your deployed Render backend:
+   - `VITE_API_BASE_URL`: `https://your-render-app-url.onrender.com/api`
+   - `VITE_WS_BASE_URL`: `wss://your-render-app-url.onrender.com/api`
+   *(Make sure to use `wss://` for secure WebSockets!)*
+6. **Deploy**: Click "Deploy". Vercel will run `npm run build` and publish your frontend.
+7. **Visit your Site**: Your AI Chess Bot Arena is now live!
 
-Open `docker-compose.yml` and modify the `args` under the `frontend` service:
+## 3. Updating the Application
 
-```yaml
-    frontend:
-      build:
-        context: ./Frontend
-        dockerfile: Dockerfile
-        args:
-          - VITE_API_BASE_URL=http://<YOUR-VPS-IP>:8000/api
-          - VITE_WS_BASE_URL=ws://<YOUR-VPS-IP>:8000/api
-```
-*(Replace `<YOUR-VPS-IP>` with your actual server IP, e.g., `123.45.67.89`)*
-
-## 3. Build and Start the Containers
-
-Run the following command to build the Docker images and start the containers in detached mode:
-
-```bash
-docker compose up -d --build
-```
-
-## 4. Access the Application
-
-Once the containers are running, you can access your application by navigating to your server's IP address in a web browser:
-
-- **Frontend**: `http://<YOUR-VPS-IP>`
-- **Backend API Docs**: `http://<YOUR-VPS-IP>:8000/docs`
-
-## Updating the Application
-
-When you push new changes to GitHub and want to update your VPS:
-
-```bash
-# Pull the latest changes
-git pull origin main
-
-# Rebuild and restart the containers
-docker compose up -d --build
-```
+When you push new changes to the `main` branch of your GitHub repository:
+- **Vercel** will automatically trigger a build and update the frontend.
+- **Render** will automatically trigger a build and update the backend (if auto-deploy is enabled).

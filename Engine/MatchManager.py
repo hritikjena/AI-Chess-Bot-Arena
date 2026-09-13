@@ -99,7 +99,8 @@ def run_match_generator(bot1_name, bot2_name, max_moves=200):
     white_pts, black_pts = get_captured_points(board)
     
     try:
-        engine = chess.engine.SimpleEngine.popen_uci("/opt/homebrew/bin/stockfish")
+        stockfish_path = os.getenv("STOCKFISH_PATH", "/opt/homebrew/bin/stockfish")
+        engine = chess.engine.SimpleEngine.popen_uci(stockfish_path)
     except Exception:
         engine = None
         
