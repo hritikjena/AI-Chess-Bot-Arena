@@ -7,9 +7,9 @@ pip install -r requirements.txt
 # Download stockfish if not exists
 if [ ! -f "stockfish-ubuntu" ]; then
     echo "Downloading Stockfish..."
-    curl -L -o stockfish.tar.gz https://github.com/official-stockfish/Stockfish/releases/latest/download/stockfish-linux-x86-64-universal.tar.gz
-    tar -xvf stockfish.tar.gz
-    mv stockfish/stockfish-linux-x86-64-universal ./stockfish-ubuntu
+    curl -L -o stockfish.tar https://github.com/official-stockfish/Stockfish/releases/download/sf_16.1/stockfish-ubuntu-x86-64-avx2.tar
+    tar -xvf stockfish.tar
+    mv stockfish/stockfish-ubuntu-x86-64-avx2 ./stockfish-ubuntu
     chmod +x ./stockfish-ubuntu
-    rm -rf stockfish stockfish.tar.gz
+    rm -rf stockfish stockfish.tar
 fi
